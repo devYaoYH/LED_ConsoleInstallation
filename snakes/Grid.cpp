@@ -35,6 +35,12 @@ void Grid::clear(){
   }
 }
 
+void Grid::setall(int val){
+  for (int i=0;i<grid_size;++i){
+    grid[i] = val;
+  }
+}
+
 Grid::~Grid(){
   delete grid;
 }
