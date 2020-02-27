@@ -1,50 +1,57 @@
 #include <FastLED.h>
+#include "Sensor.h"
+#include "Snakes.h"
+#include "Position.h"
+#define DIMS 7
 #define NUM_LEDS 50
 #define DATA_PIN 5
-#define LEFT_BTN 2
-#define RIGHT_BTN 3
+#define LEFT_BTN 8
+#define RIGHT_BTN 9
 #define REFRESH_RATE 30
 
+typedef Sensor sensor;
+typedef Position pos;
+
+// Global Control Vars
 int cur_idx = 0;
 unsigned long btn_timeout = 100;
-unsigned long left_btn_timeout = 0;
-unsigned long right_btn_timeout = 0;
-bool left_btn_down = false;
-bool right_btn_down = false;
-
 unsigned long screen_refresh = 0;
 
+// LED data array
 CRGB leds[NUM_LEDS];
 
-typedef struct Position{
-  int x, y;
-  Position(int ix, int iy): x(ix), y(iy){}
-  Position add(Position &o){
-    return Position(x + o.x, y + o.y);
-  }
-  Position sub(Position &o){
-    return Position(x - o.x, y - o.y);
-  }
-  Position mult(int c){
-    return Position(c*x, c*y);
-  }
-  String str(){
-    return "(" + String(x) + "," + String(y) + ")";
-  }
-} pos;
+// Sensors array
+sensor* SENSOR[4] = {new sensor(), new sensor(), new sensor(), new sensor()};
 
-pos ADJ[4] = {pos(0, 1), pos(1, 0), pos(0, -1), pos(-1, 0)};
+// 2D coord to 
+int grid[DIMS][DIMS] = 
+  {{1,2,3,4,5,6,7},
+  {14,13,12,11,10,9,8},
+  {15,16,17,18,19,20,21},
+  {28,27,26,25,24,23,22},
+  {29,30,31,32,33,34,35},
+  {42,41,40,39,38,37,36},
+  {43,44,45,46,47,48,49}};
+
+// Game Actual
+Game* cur_game;
 
 void setup() {
   // put your setup code here, to run once:
   delay(2000);
+  // Setup
+  randomSeed(0);
   for (int i=0;i<NUM_LEDS;++i){
     leds[i] = CRGB::Black;
   }
   FastLED.addLeds<WS2811, DATA_PIN, RGB>(leds, NUM_LEDS);
   FastLED.show();
-  pinMode(LEFT_BTN, INPUT_PULLUP);
-  pinMode(RIGHT_BTN, INPUT_PULLUP);
+  for (int i=0;i<4;++i){
+    SENSOR[i]->update_pin(i+8);
+    pinMode(i+8, INPUT_PULLUP);
+  }
+  // Create a Game
+  cur_game = new Snakes(DIMS);
   // DEBUG
   Serial.begin(9600);
 }
@@ -54,13 +61,34 @@ void btn_pressed(int btn_pin){
     case LEFT_BTN:
       cur_idx--;
       cur_idx = (cur_idx + NUM_LEDS)%NUM_LEDS;
+      cur_game->action(LEFT_BTN);
       break;
     case RIGHT_BTN:
       cur_idx++;
       cur_idx = cur_idx%NUM_LEDS;
+      cur_game->action(RIGHT_BTN);
       break;
     default:
       return;
+  }
+}
+
+CRGB game_enum_to_col(int e){
+  switch(e){
+    case (0):
+      return CRGB::Black;
+    case (1):
+      return CRGB::Aquamarine;
+    case (2):
+      return CRGB::RosyBrown;
+    case (3):
+      long rnd_col = random((1<<24)-1);
+      uint8_t r = rnd_col >> 16;
+      uint8_t g = rnd_col >> 8;
+      uint8_t b = rnd_col;
+      return CRGB(r, g, b);
+    default:
+      return CRGB::Black;
   }
 }
 
@@ -68,32 +96,31 @@ void loop() {
   bool is_update = false;
   unsigned long cur_time = millis();
 
-  if (digitalRead(LEFT_BTN) == HIGH) left_btn_down = false;
-  if (digitalRead(RIGHT_BTN) == HIGH) right_btn_down = false;
-  
-  if (cur_time > left_btn_timeout && digitalRead(LEFT_BTN) == LOW && !left_btn_down){
-    btn_pressed(LEFT_BTN);
-    left_btn_timeout = cur_time + btn_timeout;
-    left_btn_down = true;
-    is_update = true;
-  }
-  
-  if (cur_time > right_btn_timeout && digitalRead(RIGHT_BTN) == LOW && !right_btn_down){
-    btn_pressed(RIGHT_BTN);
-    right_btn_timeout = cur_time + btn_timeout;
-    right_btn_down = true;
-    is_update = true;
-  }
-
-  if (is_update){
-    for(int i=0;i<NUM_LEDS;++i){
-      leds[i] = CRGB::Black;
+  // Handle input to buttons
+  for (sensor* s: SENSOR){
+    if (digitalRead(s->PIN) == HIGH) s->state = false;
+    if (cur_time > s->timeout && digitalRead(s->PIN) == LOW && !s->state){
+      btn_pressed(s->PIN);
+      s->timeout = cur_time + btn_timeout;
+      s->state = true;
+      is_update = true;
     }
-    Serial.println(cur_idx);
-    Serial.println(ADJ[cur_idx%4].str());
-    leds[cur_idx] = CRGB::Green;
   }
 
+  // Call game update
+  is_update = cur_game->play(); //Tracks whether there is an UI update to be applied
+
+  // If we have an update this turn, sync visuals
+  if (is_update){
+    // Cycle through to sync with new grid
+    for (int x=0;x<DIMS;++x){
+      for (int y=0;y<DIMS;++y){
+        leds[grid[x][y]] = game_enum_to_col(cur_game->get(y,x));
+      }
+    }
+  }
+
+  // Refreshes display every few milliseconds rather than every loop
   if (cur_time > screen_refresh){
     FastLED.show();
     screen_refresh = cur_time + REFRESH_RATE;
