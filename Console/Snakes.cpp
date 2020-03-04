@@ -1,10 +1,27 @@
 #include "Snakes.h"
-Snakes::Snakes(int d, Grid* ig):snake_len(1),cur_snake_idx(0),dims(d),last_dir(0),next_dir(0),interrupt(false),g(ig){
+Snakes::Snakes(int d, Grid* ig):Game(d),g(ig),snake_len(1),cur_snake_idx(0),last_dir(0),next_dir(0),interrupt(false){
   reset();
 }
 
 Snakes::~Snakes(){
   
+}
+
+void Snakes::draw_led(CHSV* led, int val){
+  switch(val){
+    case EMPTY:
+      led->setHSV(0,0,0);
+      break;
+    case SNAKE:
+      led->setHSV(HUE_AQUA,255,180);
+      break;
+    case FOOD:
+      led->setHSV(HUE_PINK,255,180);
+      break;
+    default:
+      led->setHSV(HUE_ORANGE,255,180);
+      break;
+  }
 }
 
 void Snakes::generate_food(){
@@ -87,13 +104,9 @@ bool Snakes::turn(){
       }
       break;
     default:
-      return false;
+      break;
   }
   return false;
-}
-
-bool Snakes::play(){
-  return turn();
 }
 
 bool Snakes::play(unsigned long cur_time){

@@ -5,6 +5,7 @@
 #include "Position.h"
 #include "Snakes.h"
 #include "AutoSnakes.h"
+#include "Animate.h"
 #define DIMS 7
 #define NUM_LEDS 50
 #define DATA_PIN 5
@@ -15,12 +16,12 @@
 
 #define REFRESH_RATE 30
 
-#define NUM_STATES 4
+#define NUM_COLORS 4
 
 // Game Types
-#define NUM_MODES 1 //IMPT! Need to prevent overflow of cycling
-#define SNAKE 0
-#define SPECTRUM 1
+#define NUM_MODES 2 //IMPT! Need to prevent overflow of cycling
+#define SPECTRUM 0
+#define SNAKE 1
 #define ACM 2
 // Additional Type definitions
 
@@ -34,7 +35,7 @@ unsigned long screen_refresh = 0;
 
 // LED data array
 CRGB leds[NUM_LEDS];
-CRGB colors[NUM_STATES] = {
+CRGB colors[NUM_COLORS] = {
   CRGB::Black,
   CRGB::Aquamarine,
   CRGB::RosyBrown,
@@ -68,12 +69,15 @@ void spawn_game(int GAME){
       disp_grid->clear();
       // Create new instance of our game
       cur_game = new AutoSnakes(DIMS,disp_grid);
+      disp_grid->update_game(cur_game);
       break;
     //TODO: Implement Spectrum cycling with HSV
-//    case SPECTRUM:
-//      delete cur_game;
-//      cur_game = new Animate_Spectrum(DIMS);
-//      break;
+    case SPECTRUM:
+      delete cur_game;
+      disp_grid->clear();
+      cur_game = new Animate_Spectrum(DIMS,disp_grid);
+      disp_grid->update_game(cur_game);
+      break;
     //TODO: Implement a system to print characters
 //    case ACM:
 //      delete cur_game;
@@ -110,44 +114,21 @@ void btn_pressed(int btn_pin){
   }
 }
 
-int game_enum_to_col(int e){
-  switch(e){
-    case (0):
-      return 0;
-    case (1):
-      return 1;
-    case (2):
-      return 2;
-    case (3):
-      return -1;
-    default:
-      return 0;
-  }
-}
-
 void update_screen(){
-  Serial.println("Has Update");
-  // Cycle through to sync with new grid
-  for (int x=0;x<DIMS;++x){
-    for (int y=0;y<DIMS;++y){
-      int state = game_enum_to_col(disp_grid->get(y,x));
-      if (state != -1 && state < NUM_STATES){
-        leds[grid[x][y]] = colors[state];
-      }
-      else{
-        long rnd_col = random((1<<24)-1);
-        uint8_t r = rnd_col >> 16;
-        uint8_t g = rnd_col >> 8;
-        uint8_t b = rnd_col;
-        leds[grid[x][y]] = CRGB(r, g, b);
-      }
-      Serial.print(state);
+//  Serial.println("Has Update");
+  for(int r=0;r<DIMS;++r){
+    for(int c=0;c<DIMS;++c){
+      hsv2rgb_rainbow(*disp_grid->get_col(r,c),leds[grid[c][r]]);
+//      Serial.print(disp_grid->get(r,c));
     }
-    Serial.println("");
+//    Serial.println("");
   }
 }
 
 void setup() {
+  // DEBUG
+  Serial.begin(9600);
+  Serial.println("Wake");
   delay(50);
   // Setup
   randomSeed(0);
@@ -156,16 +137,19 @@ void setup() {
   }
   FastLED.addLeds<WS2811, DATA_PIN, RGB>(leds, NUM_LEDS);
   // Create a Game
-  disp_grid = new Grid(DIMS);
-  cur_game = new AutoSnakes(DIMS,disp_grid);
+  disp_grid = new Grid(DIMS,0);
+  Serial.println("Init Grid");
+  cur_game = new Animate_Spectrum(DIMS,disp_grid);
+  Serial.println("Init Game");
+  disp_grid->update_game(cur_game);
   update_screen();
+  Serial.println("Draw Screen");
   // Create Sensor objects
   for (int i=0;i<4;++i){
     SENSOR[i]->update_pin(i+8);
     pinMode(i+8, INPUT_PULLUP);
   }
-  // DEBUG
-  Serial.begin(9600);
+  Serial.println("Init Success!");
 }
 
 void loop() {
@@ -193,6 +177,7 @@ void loop() {
   }
 
   // Refreshes display every few milliseconds rather than every loop
+  cur_time = millis();
   if (cur_time > screen_refresh){
     FastLED.show();
     screen_refresh = cur_time + REFRESH_RATE;

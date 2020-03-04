@@ -1,4 +1,5 @@
 #pragma once
+#include <FastLED.h>
 #include <math.h>
 #include "Game.h"
 #include "Grid.h"
@@ -12,6 +13,7 @@ typedef Position pos;
 
 class Snakes: public Game{
   protected:
+    Grid* g;
     // Possible grid values for this game
     enum VALS {
       ERR = -1,
@@ -27,21 +29,19 @@ class Snakes: public Game{
       WIN = 1
     };
     STATE state = PLAY;
-    pos ADJ[4] = {pos(0, 1), pos(1, 0), pos(0, -1), pos(-1, 0)};
     pos snake_locs[MAX_LEN];
     pos food_loc;
     int snake_len, cur_snake_idx;
-    int dims,last_dir,next_dir;
+    int last_dir,next_dir;
     bool interrupt;
-    Grid* g;
     void move(int dir);
     bool turn();
     void reset();
     void generate_food();
+    void draw_led(CHSV* led, int val);
   public:
     Snakes(int d, Grid* ig);
     virtual ~Snakes();
-    bool play();
     bool play(unsigned long cur_time);
     void action(int act_id);
 };
