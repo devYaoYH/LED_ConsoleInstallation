@@ -11,6 +11,7 @@ Grid::Grid(int d, Game* ig):game(ig),dims(d),grid_size(d*d){
 }
 
 Grid::~Grid(){
+  game = 0;
   delete grid;
   delete[] grid_col;
 }
@@ -78,7 +79,7 @@ void Grid::setall(int val){
 
 void Grid::setall_col(CHSV& col){
   for (int i=0;i<grid_size+1;++i){
-    grid_col[i]->setHSV(0, 0, 0);
+    *grid_col[i] = col;
   }
 }
 

@@ -4,7 +4,7 @@ Snakes::Snakes(int d, Grid* ig):Game(d),g(ig),snake_len(1),cur_snake_idx(0),last
 }
 
 Snakes::~Snakes(){
-  
+  g = 0;
 }
 
 void Snakes::draw_led(CHSV* led, int val){

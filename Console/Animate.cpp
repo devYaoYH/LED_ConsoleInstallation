@@ -13,7 +13,9 @@ Animate_Spectrum::Animate_Spectrum(int d, Grid* ig):Game(d),g(ig){
   }
 }
 
-Animate_Spectrum::~Animate_Spectrum(){}
+Animate_Spectrum::~Animate_Spectrum(){
+  g = 0;
+}
 
 void Animate_Spectrum::draw_led(CHSV* led, int val){
   // Don't need to do anything, just define

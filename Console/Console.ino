@@ -37,7 +37,7 @@ unsigned long screen_refresh = 0;
 
 // Cycling between Games
 unsigned long gameMode_delay = 180000;
-unsigned long gameMode_timeout = 0;
+unsigned long gameMode_timeout = 180000;
 
 // LED data array
 CRGB leds[NUM_LEDS];
@@ -128,7 +128,7 @@ void update_screen(){
 //  Serial.println("Has Update");
   for(int r=0;r<DIMS;++r){
     for(int c=0;c<DIMS;++c){
-      hsv2rgb_rainbow(*disp_grid->get_col(r,c),leds[grid[c][r]]);
+      hsv2rgb_rainbow(*(disp_grid->get_col(r,c)),leds[grid[c][r]]);
 //      Serial.print(disp_grid->get(r,c));
     }
 //    Serial.println("");
@@ -197,6 +197,7 @@ void loop() {
   // Refreshes display every few milliseconds rather than every loop
   cur_time = millis();
   if (cur_time > screen_refresh){
+    Serial.println("REFRESH");
     FastLED.show();
     screen_refresh = cur_time + REFRESH_RATE;
   }
