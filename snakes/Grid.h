@@ -17,8 +17,6 @@ class Grid{
     void set(int r, int c, int val);
     void clear();
     void setall(int val);
-//    pos up(int r, int c);
-//    pos right(int r, int c);
-//    pos down(int r, int c);
-//    pos left(int r, int c);
+    void emoji_smile();
+    void emoji_frown();
 };

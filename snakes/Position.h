@@ -1,5 +1,6 @@
 #pragma once
 #include <WString.h>
+#include <math.h>
 struct Position{
   int x, y;
   Position():x(0),y(0){}
@@ -18,6 +19,9 @@ struct Position{
   }
   void update(Position &p){
     x = p.x; y = p.y;
+  }
+  int dist(Position &p){
+    return abs(x-p.x) + abs(y-p.y);
   }
   String str(){
     return "(" + String(x) + "," + String(y) + ")";

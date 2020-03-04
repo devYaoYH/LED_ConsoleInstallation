@@ -1,14 +1,36 @@
 #include "Snakes.h"
+Snakes::Snakes(int d, Grid* ig):snake_len(1),cur_snake_idx(0),dims(d),last_dir(0),next_dir(0),interrupt(false),g(ig){
+  reset();
+}
+
+Snakes::~Snakes(){
+  
+}
+
 void Snakes::generate_food(){
   int rc = time_counter % dims;
   int rr = (time_counter >> 10) % dims;
   g->set(food_loc,EMPTY);
   food_loc.update(rc,rr);
+  while (g->get(food_loc) != EMPTY){
+    //Traverse the rest of the grid
+    int nc = rc + 1;
+    int nr = rr;
+    if (nc == dims){
+      nr++;
+      nc = 0;
+    }
+    if (nr == dims){
+      nr = 0;
+    }
+    rc = nc; rr = nr;
+    food_loc.update(rc,rr);
+  }
   g->set(food_loc,FOOD);
 }
 
 void Snakes::reset(){
-  turn_delay = 1000;
+  turn_delay = START_TIME;
   cur_snake_idx = 0;
   snake_len = 1;
   snake_locs[cur_snake_idx].update(dims/2,dims/2);
@@ -27,18 +49,19 @@ bool Snakes::turn(){
         int last_pos = (cur_snake_idx - snake_len + MAX_LEN) % MAX_LEN;
         g->set(snake_locs[last_pos],EMPTY);
         g->set(snake_locs[cur_snake_idx],SNAKE);
+        g->set(food_loc,FOOD);
         return true;
       }
       else if (time_counter > turn_timeout){
         turn_timeout = time_counter + turn_delay;
-        move(last_dir);
+        move(next_dir);
         return turn();
       }
       break;
     case LOSE:
       if (lose_init){
         lose_timeout = time_counter + lose_delay;
-        g->setall(FOOD);
+        g->emoji_frown();
         lose_init = false;
         return true;
       }
@@ -48,10 +71,11 @@ bool Snakes::turn(){
         reset();
         return true;
       }
+      break;
     case WIN:
       if (win_init){
         win_timeout = time_counter + win_delay;
-        g->setall(SNAKE);
+        g->emoji_smile();
         win_init = false;
         return true;
       }
@@ -61,6 +85,7 @@ bool Snakes::turn(){
         reset();
         return true;
       }
+      break;
     default:
       return false;
   }
@@ -79,10 +104,12 @@ bool Snakes::play(unsigned long cur_time){
 void Snakes::action(int act_id){
   switch(act_id){
     case RIGHT:
-      last_dir = (last_dir + 1) % 4;
+      next_dir = (last_dir + 1) % 4;
+      interrupt = true;
       break;
     case LEFT:
-      last_dir = (last_dir + 3) % 4;
+      next_dir = (last_dir + 3) % 4;
+      interrupt = true;
       break;
     default:
       return; // Do Nothing
@@ -107,13 +134,11 @@ void Snakes::move(int dir){
       win_init = true;
       return;
     }
+    // Scale difficulty by making snake move faster
+    turn_delay = START_TIME - (int)(175*sqrt(snake_len));
   }
   snake_locs[new_idx].update(new_p);
   cur_snake_idx = new_idx;
   has_action = true;
-}
-
-int Snakes::get(int r, int c){
-  if (g == 0) return ERR;
-  return g->get(r,c);
+  last_dir = dir;
 }

@@ -41,6 +41,38 @@ void Grid::setall(int val){
   }
 }
 
+void Grid::emoji_frown(){
+  clear();
+  int mr = dims/2; int mc = dims/2;
+  // Frown
+  set(mc+2,mr+2,1);
+  set(mc-2,mr+2,1);
+  set(mc+3,mr+3,1);
+  set(mc-3,mr+3,1);
+  for(int i=mc-1;i<=mc+1;++i) set(i,mr+1,1);
+  // Eyes
+  set(mc+1,mr-1,1);
+  set(mc-1,mr-1,1);
+  set(mc+1,mr-2,1);
+  set(mc-1,mr-2,1);
+}
+
+void Grid::emoji_smile(){
+  clear();
+  int mr = dims/2; int mc = dims/2;
+  // Smile
+  set(mc+3,mr,1);
+  set(mc-3,mr,1);
+  set(mc+2,mr+1,1);
+  set(mc-2,mr+1,1);
+  for(int i=mc-1;i<=mc+1;++i) set(i,mr+2,1);
+  // Eyes
+  set(mc+1,mr-1,1);
+  set(mc-1,mr-1,1);
+  set(mc+1,mr-2,1);
+  set(mc-1,mr-2,1);
+}
+
 Grid::~Grid(){
   delete grid;
 }

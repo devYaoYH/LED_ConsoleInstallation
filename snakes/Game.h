@@ -1,3 +1,9 @@
+// Properly defines the hardware
+// button configurations
+#define DOWN 8
+#define UP 9
+#define LEFT 11
+#define RIGHT 10
 class Game{
   protected:
     bool has_action = false;
@@ -11,9 +17,7 @@ class Game{
     bool win_init = true;
     bool lose_init = true;
   public:
-    Game(){}
     virtual bool play() = 0;
     virtual bool play(unsigned long) = 0;
     virtual void action(int) = 0;
-    virtual int get(int,int) = 0;
 };
