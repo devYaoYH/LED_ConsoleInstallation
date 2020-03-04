@@ -6,6 +6,7 @@
 #include "Snakes.h"
 #include "AutoSnakes.h"
 #include "Animate.h"
+//CONTRIB: Include other headers for different games
 #define DIMS 7
 #define NUM_LEDS 50
 #define DATA_PIN 5
@@ -23,8 +24,9 @@
 #define SPECTRUM 0
 #define SNAKE 1
 #define ACM 2
-// Additional Type definitions
+//CONTRIB: Increment NUM_MODES and add your ENUM to the list!
 
+// Additional Type definitions
 typedef Sensor sensor;
 typedef Position pos;
 
@@ -75,7 +77,6 @@ void spawn_game(int GAME){
       cur_game = new AutoSnakes(DIMS,disp_grid);
       disp_grid->update_game(cur_game);
       break;
-    //TODO: Implement Spectrum cycling with HSV
     case SPECTRUM:
       delete cur_game;
       disp_grid->clear();
@@ -85,7 +86,12 @@ void spawn_game(int GAME){
     //TODO: Implement a system to print characters
 //    case ACM:
 //      delete cur_game;
-//      cur_game = new Animate_ACM(DIMS);
+//      cur_game = new Animate_ACM(DIMS,disp_grid);
+//      break;
+    //CONTRIB: Remember to add in your game below!
+//    case YOUR_GAME:
+//      delete cur_game;
+//      cur_game = new YOUR_GAME(DIMS,disp_grid);
 //      break;
     default:
       break;

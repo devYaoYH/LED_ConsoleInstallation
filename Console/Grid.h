@@ -6,15 +6,25 @@ typedef Position pos;
 
 class Grid{
   private:
+    // Object pointers for required interaction
     Game* game;
     int* grid;
     CHSV** grid_col;
+
+    // Out-Of-Bounds tracking
     int dims;
     int grid_size;
+
+    // Helper function to serialize grid coordinates
     int idx(int r, int c);
+
   public:
+    // Keeps track of Game object to use the draw_led(CHSV*,int) function
     Grid(int d, Game* ig);
+
+    // Properly frees up heap usage
     ~Grid();
+    
     // Logical manipulation
     int get(pos& p);
     int get(int r, int c);
@@ -29,7 +39,7 @@ class Grid{
     void clear();
     void setall(int val);
     void setall_col(CHSV& col);
-    void update_game(Game* g);
+    void update_game(Game* g);  // Called within Console.ino to reuse Grid objects
     // Convenient Drawings
     void emoji_smile();
     void emoji_frown();
