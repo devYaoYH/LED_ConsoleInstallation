@@ -42,5 +42,10 @@ bool AutoSnakes::play(unsigned long cur_time){
     // simulating calls to action
     ai_move();
   }
+  // Otherwise, we have lost too much! Assist
+  else if (lose_counter > 3){
+    lose_counter = 0;
+    interrupt = false;
+  }
   return has_moved;
 }

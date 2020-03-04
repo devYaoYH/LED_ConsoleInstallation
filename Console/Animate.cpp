@@ -2,6 +2,15 @@
 typedef Position pos;
 Animate_Spectrum::Animate_Spectrum(int d, Grid* ig):Game(d),g(ig){
   turn_delay = 50;  // Change to a fine-grained timestep
+  // Setup initial stripes
+  for (int r=0;r<dims;++r){
+    for (int c=0;c<dims;++c){
+      CHSV* cell = g->get_col(r,c);
+      if (cell != 0){
+        cell->setHSV(HUE_OFFSET*c,255,120);
+      }
+    }
+  }
 }
 
 Animate_Spectrum::~Animate_Spectrum(){}

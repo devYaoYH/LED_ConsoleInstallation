@@ -5,7 +5,7 @@
 typedef Position pos;
 
 #define HUE_GAIN 2
-#define HUE_OFFSET 40
+#define HUE_OFFSET 5
 
 class Animate_Spectrum: public Game{
   protected:

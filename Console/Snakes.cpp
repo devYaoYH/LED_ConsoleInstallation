@@ -1,5 +1,5 @@
 #include "Snakes.h"
-Snakes::Snakes(int d, Grid* ig):Game(d),g(ig),snake_len(1),cur_snake_idx(0),last_dir(0),next_dir(0),interrupt(false){
+Snakes::Snakes(int d, Grid* ig):Game(d),g(ig),snake_len(1),cur_snake_idx(0),last_dir(0),next_dir(0),lose_counter(0),interrupt(false){
   reset();
 }
 
@@ -80,6 +80,7 @@ bool Snakes::turn(){
         lose_timeout = time_counter + lose_delay;
         g->emoji_frown();
         lose_init = false;
+        lose_counter++;
         return true;
       }
       if (time_counter > lose_timeout){

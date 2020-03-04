@@ -33,6 +33,7 @@ class Snakes: public Game{
     pos food_loc;
     int snake_len, cur_snake_idx;
     int last_dir,next_dir;
+    int lose_counter;
     bool interrupt;
     void move(int dir);
     bool turn();

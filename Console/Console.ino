@@ -33,6 +33,10 @@ int cur_idx = 0;
 unsigned long btn_timeout = 100;
 unsigned long screen_refresh = 0;
 
+// Cycling between Games
+unsigned long gameMode_delay = 180000;
+unsigned long gameMode_timeout = 0;
+
 // LED data array
 CRGB leds[NUM_LEDS];
 CRGB colors[NUM_COLORS] = {
@@ -160,12 +164,20 @@ void loop() {
   for (sensor* s: SENSOR){
     if (digitalRead(s->PIN) == HIGH) s->state = false;
     if (cur_time > s->timeout && digitalRead(s->PIN) == LOW && !s->state){
+      // Reset IDLE timer
+      gameMode_timeout = cur_time + gameMode_delay;
       btn_pressed(s->PIN);
       cur_game->action(s->PIN);
       s->timeout = cur_time + btn_timeout;
       s->state = true;
       is_update = true;
     }
+  }
+
+  // Run our own Control Loop
+  if (cur_time > gameMode_timeout){
+    gameMode_timeout = cur_time + gameMode_delay;
+    btn_pressed(DOWN_BTN);
   }
 
   // Call game update
