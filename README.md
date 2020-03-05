@@ -4,11 +4,44 @@ Contribute your game to the LED Matrix Console! Submit a pull request with your 
 
 Built using the [FastLED](https://github.com/FastLED/FastLED) Arduino library :)
 
+![LED Console](LED_Console2.png)
+
 ## Contribution Guidelines
 
 Two main classes of 'Games' exist on the Console: *Animations* and *Games*. A Game requires interaction with the buttons and implementation of two more functions, `action` and `draw_led`. On the other hand, an Animation does not provide interactivity with buttons and is comparatively simplier. Both types inherits from the base class `Game` in `Game.h`.
 
 Few modifications are needed within the main `Console.ino` file, to enable your Game to be seen by the main control loop, additions need to be made following the `//CONTRIB:` tags in `Console.ino`.
+
+```cpp
+#include "Animate.h"
+//CONTRIB: Include other headers for different games
+#define DIMS 7
+#define NUM_LEDS 50
+```
+
+```cpp
+// Game Types
+#define NUM_MODES 2 //IMPT! Need to prevent overflow of cycling
+#define SPECTRUM 0
+#define SNAKE 1
+#define ACM 2
+//CONTRIB: Increment NUM_MODES and add your ENUM to the list!
+```
+
+```cpp
+void spawn_game(int GAME){
+  switch(GAME){
+    ...
+    //CONTRIB: Remember to add in your game below!
+//    case YOUR_GAME:
+//      delete cur_game;
+//      cur_game = new YOUR_GAME(DIMS,disp_grid);
+//      break;
+    default:
+      break;
+  }
+}
+```
 
 ## Games
 
